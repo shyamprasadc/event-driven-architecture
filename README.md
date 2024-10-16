@@ -15,3 +15,12 @@ Start Production
 npm run start
 
 ```
+
+## Folder Structure 
+- database/redis/model: Contains the Schema for the DB Structure
+- routes/v1.js: Has the different routes set up and the various functions which are triggered when navigated to a route
+- controllers: Comtains the main function and logic of the system
+- core: Contains logging, state machine and event transitions
+- services/repository: Contains caching, event functions
+
+
