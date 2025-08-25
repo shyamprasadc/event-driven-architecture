@@ -1,0 +1,204 @@
+version: '3.8'
+
+services:
+  # PostgreSQL - Event Store
+  postgres:
+    image: postgres:15-alpine
+    container_name: ecommerce-postgres
+    environment:
+      POSTGRES_DB: eventstore
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./scripts/init-postgres.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - ecommerce-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # MongoDB - Read Models
+  mongodb:
+    image: mongo:7.0
+    container_name: ecommerce-mongodb
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: password
+      MONGO_INITDB_DATABASE: ecommerce
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+      - ./scripts/init-mongo.js:/docker-entrypoint-initdb.d/init.js
+    networks:
+      - ecommerce-network
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Redis - Caching and Event Streaming
+  redis:
+    image: redis:7-alpine
+    container_name: ecommerce-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - ecommerce-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # RabbitMQ - Message Broker
+  rabbitmq:
+    image: rabbitmq:3.12-management-alpine
+    container_name: ecommerce-rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+      RABBITMQ_DEFAULT_VHOST: /
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    networks:
+      - ecommerce-network
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # EventStoreDB - Event Store (Alternative)
+  eventstore:
+    image: eventstore/eventstore:latest
+    container_name: ecommerce-eventstore
+    environment:
+      EVENTSTORE_CLUSTER_SIZE: 1
+      EVENTSTORE_RUN_PROJECTIONS: All
+      EVENTSTORE_START_STANDARD_PROJECTIONS: true
+      EVENTSTORE_EXT_TCP_PORT: 1113
+      EVENTSTORE_HTTP_PORT: 2113
+      EVENTSTORE_ADMIN_USER: admin
+      EVENTSTORE_ADMIN_PASSWORD: changeit
+    ports:
+      - "1113:1113"
+      - "2113:2113"
+    volumes:
+      - eventstore_data:/var/lib/eventstore
+    networks:
+      - ecommerce-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:2113/health/live"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Elasticsearch - Logging and Search
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.8.0
+    container_name: ecommerce-elasticsearch
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ports:
+      - "9200:9200"
+    volumes:
+      - elasticsearch_data:/usr/share/elasticsearch/data
+    networks:
+      - ecommerce-network
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:9200/_cluster/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Kibana - Log Visualization
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.8.0
+    container_name: ecommerce-kibana
+    environment:
+      ELASTICSEARCH_HOSTS: http://elasticsearch:9200
+    ports:
+      - "5601:5601"
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    networks:
+      - ecommerce-network
+
+  # Prometheus - Metrics Collection
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: ecommerce-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=200h'
+      - '--web.enable-lifecycle'
+    networks:
+      - ecommerce-network
+
+  # Grafana - Metrics Visualization
+  grafana:
+    image: grafana/grafana:latest
+    container_name: ecommerce-grafana
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: admin
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboards
+      - ./monitoring/grafana/datasources:/etc/grafana/provisioning/datasources
+    depends_on:
+      prometheus:
+        condition: service_started
+    networks:
+      - ecommerce-network
+
+  # Jaeger - Distributed Tracing
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    container_name: ecommerce-jaeger
+    environment:
+      COLLECTOR_OTLP_ENABLED: true
+    ports:
+      - "16686:16686"
+      - "14268:14268"
+      - "14250:14250"
+    networks:
+      - ecommerce-network
+
+volumes:
+  postgres_data:
+  mongodb_data:
+  redis_data:
+  rabbitmq_data:
+  eventstore_data:
+  elasticsearch_data:
+  prometheus_data:
+  grafana_data:
+
+networks:
+  ecommerce-network:
+    driver: bridge

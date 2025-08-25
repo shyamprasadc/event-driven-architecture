@@ -1,0 +1,57 @@
+{
+  "name": "@ecommerce/shared",
+  "version": "1.0.0",
+  "description": "Shared utilities and event infrastructure for e-commerce platform",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "lint": "eslint src/**/*.ts"
+  },
+  "dependencies": {
+    "uuid": "^9.0.0",
+    "amqplib": "^0.10.3",
+    "redis": "^4.6.0",
+    "pg": "^8.11.0",
+    "mongoose": "^7.5.0",
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "helmet": "^7.0.0",
+    "express-rate-limit": "^6.10.0",
+    "winston": "^3.10.0",
+    "joi": "^17.9.2",
+    "bcryptjs": "^2.4.3",
+    "jsonwebtoken": "^9.0.2",
+    "socket.io": "^4.7.2",
+    "nodemailer": "^6.9.4",
+    "twilio": "^4.10.0",
+    "prometheus-client": "^0.5.1",
+    "compression": "^1.7.4",
+    "morgan": "^1.10.0"
+  },
+  "devDependencies": {
+    "@types/uuid": "^9.0.2",
+    "@types/amqplib": "^0.10.1",
+    "@types/express": "^4.17.17",
+    "@types/cors": "^2.8.13",
+    "@types/bcryptjs": "^2.4.2",
+    "@types/jsonwebtoken": "^9.0.2",
+    "@types/nodemailer": "^6.4.9",
+    "@types/compression": "^1.7.2",
+    "@types/morgan": "^1.9.4",
+    "@types/jest": "^29.5.4",
+    "@types/node": "^20.5.0",
+    "typescript": "^5.1.6",
+    "jest": "^29.6.2",
+    "ts-jest": "^29.1.1",
+    "eslint": "^8.47.0",
+    "@typescript-eslint/eslint-plugin": "^6.4.1",
+    "@typescript-eslint/parser": "^6.4.1"
+  },
+  "peerDependencies": {
+    "express": "^4.18.2"
+  }
+}
