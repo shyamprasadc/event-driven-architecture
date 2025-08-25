@@ -2,7 +2,7 @@
 
 A comprehensive, production-ready e-commerce platform built with Node.js, featuring microservices architecture, Event Sourcing, CQRS, and real-time event streaming.
 
-## 🎯 **MVP STATUS: 100% COMPLETE** ✅
+## 🎯 **MVP STATUS: 95% COMPLETE** ✅
 
 All critical MVP features have been successfully implemented and are ready for deployment!
 
@@ -13,20 +13,19 @@ All critical MVP features have been successfully implemented and are ready for d
 | **Shared** | ✅ | ✅ | ✅ | ✅ | ✅ | **100%** |
 | **User** | ✅ | ✅ | ✅ | ✅ | ✅ | **100%** |
 | **Product** | ✅ | ✅ | ✅ | ✅ | ✅ | **100%** |
-| **Order** | ✅ | ✅ | ✅ | ✅ | ✅ | **100%** |
+| **Order** | ✅ | ✅ | ✅ | ✅ | ⚠️ | **90%** |
 | **Payment** | ✅ | ✅ | ✅ | ✅ | ✅ | **100%** |
 | **Inventory** | ✅ | ✅ | ✅ | ✅ | ✅ | **100%** |
-| **Infrastructure** | ✅ | ✅ | ✅ | ✅ | ✅ | **100%** |
+| **Infrastructure** | ✅ | ✅ | ✅ | ✅ | ⚠️ | **90%** |
 
 ## 🏗️ **Architecture Overview**
 
 This platform implements a modern, scalable architecture with the following key patterns:
 
 - **Microservices Architecture**: Independent, loosely coupled services
-- **Event Sourcing**: Complete audit trail and time-travel capabilities
+- **Event Sourcing**: Complete audit trail with PostgreSQL event store
 - **CQRS (Command Query Responsibility Segregation)**: Separate read and write models
-- **Saga Pattern**: Distributed transaction management
-- **Real-time Event Streaming**: Live updates via WebSocket and Redis Streams
+- **Saga Pattern**: Distributed transaction management for orders
 - **Domain-Driven Design**: Rich domain models with business logic encapsulation
 
 ## 🛠️ **Technology Stack**
@@ -39,13 +38,12 @@ This platform implements a modern, scalable architecture with the following key 
 
 ### **Event Infrastructure**
 - **Message Broker**: RabbitMQ
-- **Event Store**: PostgreSQL + EventStoreDB
-- **Real-time Streaming**: Redis Streams
+- **Event Store**: PostgreSQL
 - **Caching**: Redis
 
 ### **Databases**
 - **Write Models**: PostgreSQL (Event Store)
-- **Read Models**: MongoDB (Projections)
+- **Read Models**: MongoDB (Basic setup)
 - **Caching**: Redis
 
 ### **Payment Processing**
@@ -55,14 +53,11 @@ This platform implements a modern, scalable architecture with the following key 
 ### **Security & Monitoring**
 - **Authentication**: JWT
 - **Logging**: Winston
-- **Metrics**: Prometheus + Grafana
-- **Tracing**: Jaeger
-- **Search**: Elasticsearch + Kibana
+- **Containerization**: Docker + Docker Compose
 
 ### **Development Tools**
-- **Testing**: Jest + Supertest
+- **Testing**: Jest + Supertest (Basic setup)
 - **Linting**: ESLint
-- **Formatting**: Prettier
 - **Containerization**: Docker + Docker Compose
 
 ## 📁 **Project Structure**
@@ -84,7 +79,7 @@ event-driven-architecture/
 │   │   │   ├── commands/         # Command handlers
 │   │   │   ├── queries/          # Query handlers
 │   │   │   ├── api/              # REST controllers and routes
-│   │   │   └── infrastructure/   # Repositories, projections
+│   │   │   └── infrastructure/   # Repositories
 │   │   └── package.json
 │   │
 │   ├── product-service/          # ✅ Product catalog service
@@ -271,8 +266,7 @@ PUT /api/inventory/:inventoryId/threshold
 
 ### **Event Sourcing Benefits**
 - **Audit Trail**: Complete history of all changes
-- **Time Travel**: Reconstruct state at any point in time
-- **Event Replay**: Rebuild projections from events
+- **State Reconstruction**: Rebuild aggregates from events
 - **Debugging**: Trace exact sequence of events
 - **Compliance**: Full audit trail for regulations
 
@@ -292,14 +286,15 @@ npm run test:watch
 npm run test --workspace=@ecommerce/user-service
 ```
 
+**Note**: Currently, only basic test setup is available. Comprehensive test coverage is planned for future releases.
+
 ## 📊 **Monitoring & Observability**
 
-### **Available Dashboards**
-- **Grafana**: http://localhost:3000 (Metrics visualization)
-- **Kibana**: http://localhost:5601 (Log analysis)
-- **Jaeger**: http://localhost:16686 (Distributed tracing)
+### **Available Services**
 - **RabbitMQ Management**: http://localhost:15672 (Message broker)
-- **EventStoreDB**: http://localhost:2113 (Event store)
+- **PostgreSQL**: localhost:5432 (Event store)
+- **MongoDB**: localhost:27017 (Read models)
+- **Redis**: localhost:6379 (Caching)
 
 ### **Health Checks**
 All services provide health check endpoints:
@@ -318,15 +313,13 @@ curl http://localhost:3005/health
 2. Create domain aggregates with event sourcing
 3. Implement command and query handlers
 4. Add API controllers and routes
-5. Update projections for read models
-6. Add tests and documentation
+5. Add tests and documentation
 
 ### **Event Sourcing Best Practices**
 - Events should be immutable and represent facts
 - Use semantic event names (e.g., `OrderCreated`, `PaymentProcessed`)
 - Include all necessary data in events
 - Version events for backward compatibility
-- Use snapshots for performance optimization
 
 ## 🚀 **Deployment**
 
@@ -361,7 +354,7 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ## 🎉 **MVP Achievement**
 
-**🎯 ALL CRITICAL MVP FEATURES COMPLETED!**
+**🎯 CRITICAL MVP FEATURES COMPLETED!**
 
 ✅ **User Management**: Registration, authentication, profiles, addresses
 ✅ **Product Catalog**: Product management, search, categories, pricing
@@ -369,10 +362,28 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 ✅ **Payment Processing**: Stripe integration with webhooks
 ✅ **Inventory Management**: Stock tracking, reservations, allocations
 ✅ **Event Infrastructure**: Complete event sourcing implementation
-✅ **Real-time Communication**: WebSocket and Redis Streams
-✅ **Monitoring & Observability**: Full observability stack
 ✅ **Security**: Authentication, authorization, input validation
-✅ **Testing**: Comprehensive test coverage
 ✅ **Documentation**: Complete API documentation
 
-**The platform is now ready for production deployment! 🚀**
+## 🚧 **Known Limitations & Future Enhancements**
+
+### **Currently Not Implemented**
+- **WebSocket Support**: Real-time communication not yet implemented
+- **Projections**: Read models are basic, advanced projections planned
+- **Monitoring Dashboards**: Grafana, Prometheus, Jaeger setup planned
+- **Comprehensive Testing**: Only basic test setup available
+- **Time Travel**: Event replay functionality planned
+- **Snapshots**: Performance optimization planned
+- **Circuit Breakers**: Resilience patterns planned
+- **Auto-scaling**: Infrastructure scaling planned
+- **CI/CD**: Pipeline automation planned
+
+### **Planned Enhancements**
+- **Real-time Notifications**: WebSocket implementation
+- **Advanced Monitoring**: Full observability stack
+- **Performance Optimization**: Snapshots and caching
+- **Resilience Patterns**: Circuit breakers and retry logic
+- **Comprehensive Testing**: Full test coverage
+- **Production Deployment**: CI/CD and auto-scaling
+
+**The platform is ready for development and testing! 🚀**
